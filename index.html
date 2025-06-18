@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sea Fishing Adventure 3D</title>
+  <style>
+    body { margin: 0; overflow: hidden; touch-action: none; }
+    #ui {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255,255,255,0.8);
+      padding: 10px;
+      border-radius: 8px;
+      font-family: sans-serif;
+    }
+    button { margin: 5px; }
+  </style>
+</head>
+<body>
+  <div id="ui">
+    <button id="btnCatch">🎣 Catch</button>
+    <button id="btnDive">🤿 Dive</button>
+    <button id="btnSell">💰 Sell</button>
+    <button id="btnUpgrade">🔧 Upgrade</button>
+    <div>Money: <span id="money">0</span></div>
+    <div>Rod: <span id="rod">Basic</span></div>
+    <div>Inventory: <span id="inventory">None</span></div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script>
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 10, 20);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const waterGeo = new THREE.PlaneGeometry(200,200);
+    const waterMat = new THREE.MeshPhongMaterial({ color: 0x1e90ff, transparent:true, opacity:0.7 });
+    const water = new THREE.Mesh(waterGeo, waterMat);
+    water.rotation.x = -Math.PI/2;
+    scene.add(water);
+
+    const boatGeo = new THREE.BoxGeometry(2,1,1);
+    const boatMat = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
+    const boat = new THREE.Mesh(boatGeo, boatMat);
+    scene.add(boat);
+
+    const islandGeo = new THREE.CylinderGeometry(3,3,1,16);
+    const islandMat = new THREE.MeshLambertMaterial({ color: 0x228B22 });
+    const islandPositions = [ [-20,-10],[10,-15],[18,5],[-5,20],[25,20] ];
+    const islands = islandPositions.map(pos => {
+      const isl = new THREE.Mesh(islandGeo, islandMat);
+      isl.position.set(pos[0], 0.5, pos[1]);
+      scene.add(isl);
+      return isl;
+    });
+
+    const sun = new THREE.DirectionalLight(0xffffff, 1);
+    sun.position.set(10,20,10);
+    scene.add(sun);
+    scene.add(new THREE.AmbientLight(0x404040));
+
+    const fishTypes = [
+      { name:"Tuna", weight:5, value:50, color:0x999999 },
+      { name:"Salmon", weight:3, value:35, color:0xff704d },
+      { name:"Golden Carp", weight:1, value:100, color:0xffd700 },
+      { name:"Swordfish", weight:6, value:80, color:0x334455 },
+      { name:"Clownfish", weight:1, value:40, color:0xff5500 },
+      { name:"Anglerfish", weight:4, value:90, color:0x333300 },
+      { name:"Marlin", weight:7, value:110, color:0x004488 },
+      { name:"Seabass", weight:2, value:30, color:0x999966 },
+      { name:"Trout", weight:3, value:45, color:0xcc9966 },
+      { name:"Stingray", weight:5, value:120, color:0x444444 },
+      { name:"Eel", weight:4, value:60, color:0x222255 },
+      { name:"Jellyfish", weight:1, value:25, color:0xccffff },
+      { name:"Mackerel", weight:2, value:28, color:0x7777aa },
+      { name:"Halibut", weight:6, value:85, color:0x445522 },
+      { name:"Barracuda", weight:5, value:75, color:0x223344 },
+      { name:"Catfish", weight:4, value:55, color:0x553311 },
+      { name:"Blue Tang", weight:1, value:50, color:0x0000ff },
+      { name:"Pufferfish", weight:2, value:35, color:0xffcc00 },
+      { name:"Snapper", weight:3, value:60, color:0xff3333 },
+      { name:"Koi", weight:2, value:45, color:0xffaa00 },
+      { name:"Tilapia", weight:2, value:33, color:0xaaffcc },
+      { name:"Zebrafish", weight:1, value:20, color:0xffffff },
+      { name:"Crab", weight:1, value:15, color:0xaa0000 }
+    ];
+
+    const activeFish = [];
+    function spawnFish(){
+      const spec = fishTypes[Math.floor(Math.random()*fishTypes.length)];
+      const f = new THREE.Mesh(new THREE.SphereGeometry(0.3), new THREE.MeshBasicMaterial({ color: spec.color }));
+      f.userData = spec;
+      f.position.set((Math.random()-0.5)*50, 0.3, (Math.random()-0.5)*50);
+      scene.add(f);
+      activeFish.push(f);
+    }
+    for(let i=0;i<30;i++) spawnFish();
+
+    const state = { money:0, inventory:[], rod:"Basic" };
+    const ui = {
+      money: document.getElementById("money"),
+      rod: document.getElementById("rod"),
+      inventory: document.getElementById("inventory")
+    };
+
+    const keys = {};
+    window.addEventListener('keydown', e=>keys[e.key]=true);
+    window.addEventListener('keyup', e=>keys[e.key]=false);
+
+    document.getElementById("btnCatch").addEventListener('click', catchFish);
+    document.getElementById("btnSell").addEventListener('click', sellFish);
+    document.getElementById("btnUpgrade").addEventListener('click', upgradeRod);
+    document.getElementById("btnDive").addEventListener('click', ()=>alert("Underwater exploration coming soon!"));
+
+    function catchFish(){
+      activeFish.some((f, i)=>{
+        if(f.position.distanceTo(boat.position) < 2){
+          state.inventory.push(f.userData);
+          scene.remove(f);
+          activeFish.splice(i,1);
+          updateUI();
+          return true;
+        }
+      });
+    }
+
+    function sellFish(){
+      islands.forEach(isl=>{
+        if(isl.position.distanceTo(boat.position) < 5){
+          const value = state.inventory.reduce((sum,f)=>sum+f.value, 0);
+          state.money += value;
+          state.inventory = [];
+          updateUI();
+          alert(`Sold for $${value}`);
+        }
+      });
+    }
+
+    function upgradeRod(){
+      const upg = { Basic:"Silver", Silver:"Gold" };
+      const costs = { Silver:200, Gold:500 };
+      const next = upg[state.rod];
+      if(next && state.money >= costs[next]){
+        state.money -= costs[next];
+        state.rod = next;
+        updateUI();
+        alert(`Upgraded to ${next}`);
+      } else alert("Need more money!");
+    }
+
+    function updateUI(){
+      ui.money.innerText = state.money;
+      ui.rod.innerText = state.rod;
+      ui.inventory.innerText = state.inventory.map(f=>f.name).join(', ') || 'None';
+    }
+
+    function animate(){
+      requestAnimationFrame(animate);
+      if(keys.ArrowUp) boat.position.z -= 0.1;
+      if(keys.ArrowDown) boat.position.z += 0.1;
+      if(keys.ArrowLeft) boat.position.x -= 0.1;
+      if(keys.ArrowRight) boat.position.x += 0.1;
+      camera.lookAt(boat.position);
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', ()=>{
+      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
