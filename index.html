@@ -86,6 +86,156 @@
       width: 0%;
       transition: width 0.3s ease;
     }
+
+    /* --- Fishing Game Styles --- */
+    #fishing-game-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 30, 0.95);
+      color: white;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 20px;
+    }
+    #fishing-area {
+      background: #004466;
+      border: 2px solid #00ccff;
+      width: 90vw;
+      height: 300px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 10px;
+    }
+    .fish {
+      position: absolute;
+      width: 50px;
+      height: 25px;
+      background: #00ccff;
+      border-radius: 15px / 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      user-select: none;
+      transition: transform 0.3s, opacity 0.5s ease;
+      opacity: 0;
+      animation: fadeInFish 0.8s forwards;
+    }
+    @keyframes fadeInFish {
+      to { opacity: 1; }
+    }
+    .fish:hover {
+      transform: scale(1.2);
+    }
+    #cast-btn {
+      background: #0099ff;
+      border: none;
+      padding: 12px 30px;
+      font-size: 18px;
+      border-radius: 15px;
+      cursor: pointer;
+      margin-bottom: 15px;
+      transition: background-color 0.3s;
+    }
+    #cast-btn:disabled {
+      background-color: #005577;
+      cursor: not-allowed;
+    }
+    #close-fishing {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 20px;
+      cursor: pointer;
+      background: #003344;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      text-align: center;
+      line-height: 30px;
+      user-select: none;
+    }
+
+    /* Shop modal */
+    #shop-modal {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 68, 102, 0.95);
+      padding: 20px;
+      border-radius: 15px;
+      width: 320px;
+      max-width: 90vw;
+      display: none;
+      color: white;
+      z-index: 10001;
+      box-shadow: 0 0 15px #00ccff;
+    }
+    #shop-modal h2 {
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    #shop-items {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .shop-item {
+      background: #0077aa;
+      padding: 10px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.3s;
+      position: relative;
+    }
+    .shop-item:hover {
+      background: #005577;
+    }
+    .shop-item span {
+      font-weight: bold;
+    }
+    .owned-label {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #00cc00;
+      color: black;
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      user-select: none;
+    }
+    .equipped-label {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #ffdd00;
+      color: black;
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      user-select: none;
+    }
+    #close-shop {
+      text-align: center;
+      margin-top: 15px;
+      background: #003344;
+      border-radius: 10px;
+      padding: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
   </style>
 </head>
 <body>
@@ -98,12 +248,12 @@
 
   <div id="player-info">
     <span>🎣 Angler2529 (Beginner)</span>
-    <span>💰 1000</span>
+    <span id="coins">💰 1000</span>
     <span>🎚️ Lv. 1</span>
   </div>
 
   <div id="main-buttons">
-    <button class="menu-button" onclick="alert('Main Game coming soon!')">Main Game</button>
+    <button class="menu-button" id="main-game-btn">Main Game</button>
     <button class="menu-button" onclick="alert('Missions coming soon!')">Missions</button>
     <button class="menu-button" onclick="alert('Free Fishing coming soon!')">Free Fishing</button>
     <button class="menu-button" onclick="alert('Challenge Fishing Cup coming soon!')">Challenge Fishing Cup</button>
@@ -112,14 +262,34 @@
   </div>
 
   <div id="bottom-nav">
-    <div class="nav-button" onclick="alert('Shop feature coming soon!')">🏪<br/>Shop</div>
+    <div class="nav-button" id="shop-btn">🏪<br/>Shop</div>
     <div class="nav-button" onclick="alert('Leaderboards coming soon!')">🏆<br/>Leaderboards</div>
     <div class="nav-button" onclick="alert('Profile coming soon!')">👤<br/>Profile</div>
     <div class="nav-button" onclick="alert('Options coming soon!')">⚙️<br/>Options</div>
     <div class="nav-button" onclick="alert('Upgrade coming soon!')">⬆️<br/>Upgrade</div>
   </div>
 
+  <!-- Fishing Game Overlay -->
+  <div id="fishing-game-overlay">
+    <div id="close-fishing">×</div>
+    <h2>2D Fishing Game</h2>
+    <button id="cast-btn">🎣 Cast Line</button>
+    <div id="fishing-area"></div>
+    <div>Click fish to catch and earn coins!</div>
+    <div style="margin-top: 10px;">Current Rod: <span id="current-rod-name">Basic Rod</span></div>
+  </div>
+
+  <!-- Shop Modal -->
+  <div id="shop-modal">
+    <h2>Shop - Buy Fishing Rods</h2>
+    <div id="shop-items">
+      <!-- Items injected by JS -->
+    </div>
+    <div id="close-shop">Close</div>
+  </div>
+
   <script>
+    // Loading screen
     const progressBar = document.getElementById("progress-bar");
     function updateProgress(p) {
       progressBar.style.width = Math.min(100, p * 100) + "%";
@@ -138,6 +308,212 @@
         hideLoading();
       }
     }, 200);
+
+    // Player data
+    let coins = 1000;
+    const coinsDisplay = document.getElementById("coins");
+
+    // Rods data
+    const rods = [
+      { id: 1, name: "Basic Rod", price: 0, reward: 10, maxFish: 3, spawnInterval: 2000 },
+      { id: 2, name: "Silver Rod", price: 500, reward: 20, maxFish: 4, spawnInterval: 1700 },
+      { id: 3, name: "Golden Rod", price: 1500, reward: 35, maxFish: 5, spawnInterval: 1400 },
+      { id: 4, name: "Diamond Rod", price: 4000, reward: 50, maxFish: 6, spawnInterval: 1100 }
+    ];
+
+    // Player inventory: rods owned and equipped
+    let ownedRods = new Set([1]); // Start with Basic Rod owned
+    let equippedRodId = 1;
+
+    // Update coins display helper
+    function updateCoinsDisplay() {
+      coinsDisplay.textContent = "💰 " + coins;
+    }
+    updateCoinsDisplay();
+
+    // Show shop modal & rods for sale
+    const shopModal = document.getElementById("shop-modal");
+    const shopBtn = document.getElementById("shop-btn");
+    const shopItemsDiv = document.getElementById("shop-items");
+    const closeShopBtn = document.getElementById("close-shop");
+
+    function renderShop() {
+      shopItemsDiv.innerHTML = "";
+      rods.forEach(rod => {
+        const item = document.createElement("div");
+        item.classList.add("shop-item");
+        item.textContent = `${rod.name} - ${rod.price > 0 ? "Price: " + rod.price + " coins" : "Free"}`;
+
+        // Owned label
+        if (ownedRods.has(rod.id)) {
+          const ownedLabel = document.createElement("div");
+          ownedLabel.classList.add("owned-label");
+          ownedLabel.textContent = "Owned";
+          item.appendChild(ownedLabel);
+        }
+
+        // Equipped label
+        if (equippedRodId === rod.id) {
+          const equippedLabel = document.createElement("div");
+          equippedLabel.classList.add("equipped-label");
+          equippedLabel.textContent = "Equipped";
+          item.appendChild(equippedLabel);
+        }
+
+        // Click to buy or equip
+        item.addEventListener("click", () => {
+          if (ownedRods.has(rod.id)) {
+            // Equip rod
+            equippedRodId = rod.id;
+            document.getElementById("current-rod-name").textContent = rods.find(r => r.id === equippedRodId).name;
+            renderShop();
+          } else {
+            // Buy rod if enough coins
+            if (coins >= rod.price) {
+              coins -= rod.price;
+              ownedRods.add(rod.id);
+              equippedRodId = rod.id;
+              updateCoinsDisplay();
+              document.getElementById("current-rod-name").textContent = rod.name;
+              renderShop();
+              alert(`You bought and equipped ${rod.name}!`);
+            } else {
+              alert("Not enough coins to buy this rod.");
+            }
+          }
+        });
+
+        shopItemsDiv.appendChild(item);
+      });
+    }
+
+    shopBtn.addEventListener("click", () => {
+      renderShop();
+      shopModal.style.display = "block";
+    });
+    closeShopBtn.addEventListener("click", () => {
+      shopModal.style.display = "none";
+    });
+
+    // Fishing game logic
+    const fishingOverlay = document.getElementById("fishing-game-overlay");
+    const mainGameBtn = document.getElementById("main-game-btn");
+    const closeFishingBtn = document.getElementById("close-fishing");
+    const castBtn = document.getElementById("cast-btn");
+    const fishingArea = document.getElementById("fishing-area");
+    const currentRodName = document.getElementById("current-rod-name");
+
+    // Show fishing overlay
+    mainGameBtn.addEventListener("click", () => {
+      fishingOverlay.style.display = "flex";
+      currentRodName.textContent = rods.find(r => r.id === equippedRodId).name;
+      startFishing();
+    });
+
+    closeFishingBtn.addEventListener("click", () => {
+      fishingOverlay.style.display = "none";
+      stopFishing();
+    });
+
+    let fishInterval = null;
+    let fishIdCounter = 0;
+    let activeFish = new Map(); // fishId -> element
+
+    // Create fish element with animation and click handler
+    function createFish() {
+      if (activeFish.size >= rods.find(r => r.id === equippedRodId).maxFish) return;
+
+      const fish = document.createElement("div");
+      fish.classList.add("fish");
+      fish.textContent = "🐟";
+
+      // Random position inside fishing area
+      const maxX = fishingArea.clientWidth - 50;
+      const maxY = fishingArea.clientHeight - 25;
+      const x = Math.random() * maxX;
+      const y = Math.random() * maxY;
+      fish.style.left = x + "px";
+      fish.style.top = y + "px";
+
+      // Assign unique ID
+      fishIdCounter++;
+      const fishId = fishIdCounter;
+      activeFish.set(fishId, fish);
+
+      fishingArea.appendChild(fish);
+
+      // Animate fish fadeIn is done by CSS
+
+      // Click to catch fish
+      fish.addEventListener("click", () => {
+        catchFish(fishId);
+      });
+    }
+
+    function catchFish(fishId) {
+      const fish = activeFish.get(fishId);
+      if (!fish) return;
+
+      // Disable click
+      fish.style.pointerEvents = "none";
+
+      // Animate fade out
+      fish.style.opacity = 0;
+
+      // Remove fish after animation
+      setTimeout(() => {
+        fishingArea.removeChild(fish);
+        activeFish.delete(fishId);
+      }, 500);
+
+      // Add coins based on equipped rod reward
+      const reward = rods.find(r => r.id === equippedRodId).reward;
+      coins += reward;
+      updateCoinsDisplay();
+    }
+
+    function startFishing() {
+      // Clear any existing fish
+      fishingArea.innerHTML = "";
+      activeFish.clear();
+
+      // Enable cast button
+      castBtn.disabled = false;
+    }
+
+    function stopFishing() {
+      // Clear fish and intervals
+      fishingArea.innerHTML = "";
+      activeFish.clear();
+      clearInterval(fishInterval);
+      fishInterval = null;
+      castBtn.disabled = true;
+    }
+
+    castBtn.addEventListener("click", () => {
+      // Disable button during fishing phase
+      castBtn.disabled = true;
+
+      // Spawn fish repeatedly for 10 seconds at rod speed
+      const rod = rods.find(r => r.id === equippedRodId);
+      const spawnTime = rod.spawnInterval;
+
+      // Spawn fish immediately and then periodically
+      createFish();
+
+      let spawnCount = 1;
+      const maxSpawn = rod.maxFish;
+      fishInterval = setInterval(() => {
+        if (spawnCount >= maxSpawn) {
+          clearInterval(fishInterval);
+          fishInterval = null;
+          castBtn.disabled = false;
+          return;
+        }
+        createFish();
+        spawnCount++;
+      }, spawnTime);
+    });
   </script>
 </body>
 </html>
