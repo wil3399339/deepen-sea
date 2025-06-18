@@ -3,177 +3,141 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sea Fishing Adventure 3D</title>
+  <title>Deepen Sea - 2D UI Mockup</title>
   <style>
-    body { margin: 0; overflow: hidden; touch-action: none; }
-    #ui {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(255,255,255,0.8);
-      padding: 10px;
-      border-radius: 8px;
-      font-family: sans-serif;
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+    body {
+      background: url('https://images.unsplash.com/photo-1516908205727-40afad9449e2?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+      background-size: cover;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-    button { margin: 5px; }
+
+    #player-info {
+      background: rgba(0, 68, 102, 0.8);
+      color: white;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #player-info span { margin: 0 10px; }
+
+    #main-buttons {
+      background: rgba(207, 238, 255, 0.85);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+    .menu-button {
+      background: #0077aa;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 16px;
+      width: 200px;
+      text-align: left;
+    }
+    .menu-button:hover { background: #005577; cursor: pointer; }
+
+    #bottom-nav {
+      background: rgba(0, 68, 102, 0.8);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+    .nav-button {
+      color: white;
+      font-size: 14px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    #loading {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #001122;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    #loading h1 { margin-bottom: 20px; font-size: 2em; }
+    #progress-container {
+      width: 80%;
+      background: #333;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #progress-bar {
+      height: 20px;
+      background: #00ccff;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
   </style>
 </head>
 <body>
-  <div id="ui">
-    <button id="btnCatch">🎣 Catch</button>
-    <button id="btnDive">🤿 Dive</button>
-    <button id="btnSell">💰 Sell</button>
-    <button id="btnUpgrade">🔧 Upgrade</button>
-    <div>Money: <span id="money">0</span></div>
-    <div>Rod: <span id="rod">Basic</span></div>
-    <div>Inventory: <span id="inventory">None</span></div>
+  <div id="loading">
+    <h1>Deepen Sea</h1>
+    <div id="progress-container">
+      <div id="progress-bar"></div>
+    </div>
   </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script>
+
+  <div id="player-info">
+    <span>🎣 Angler2529 (Beginner)</span>
+    <span>💰 1000</span>
+    <span>🎚️ Lv. 1</span>
+  </div>
+
+  <div id="main-buttons">
+    <button class="menu-button" onclick="alert('Main Game coming soon!')">Main Game</button>
+    <button class="menu-button" onclick="alert('Missions coming soon!')">Missions</button>
+    <button class="menu-button" onclick="alert('Free Fishing coming soon!')">Free Fishing</button>
+    <button class="menu-button" onclick="alert('Challenge Fishing Cup coming soon!')">Challenge Fishing Cup</button>
+    <button class="menu-button" onclick="alert('Trout Masters coming soon!')">Trout Masters</button>
+    <button class="menu-button" onclick="alert('Past Results coming soon!')">Past Results</button>
+  </div>
+
+  <div id="bottom-nav">
+    <div class="nav-button" onclick="alert('Shop feature coming soon!')">🏪<br/>Shop</div>
+    <div class="nav-button" onclick="alert('Leaderboards coming soon!')">🏆<br/>Leaderboards</div>
+    <div class="nav-button" onclick="alert('Profile coming soon!')">👤<br/>Profile</div>
+    <div class="nav-button" onclick="alert('Options coming soon!')">⚙️<br/>Options</div>
+    <div class="nav-button" onclick="alert('Upgrade coming soon!')">⬆️<br/>Upgrade</div>
+  </div>
+
   <script>
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 10, 20);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
-    const waterGeo = new THREE.PlaneGeometry(200,200);
-    const waterMat = new THREE.MeshPhongMaterial({ color: 0x1e90ff, transparent:true, opacity:0.7 });
-    const water = new THREE.Mesh(waterGeo, waterMat);
-    water.rotation.x = -Math.PI/2;
-    scene.add(water);
-
-    const boatGeo = new THREE.BoxGeometry(2,1,1);
-    const boatMat = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
-    const boat = new THREE.Mesh(boatGeo, boatMat);
-    scene.add(boat);
-
-    const islandGeo = new THREE.CylinderGeometry(3,3,1,16);
-    const islandMat = new THREE.MeshLambertMaterial({ color: 0x228B22 });
-    const islandPositions = [ [-20,-10],[10,-15],[18,5],[-5,20],[25,20] ];
-    const islands = islandPositions.map(pos => {
-      const isl = new THREE.Mesh(islandGeo, islandMat);
-      isl.position.set(pos[0], 0.5, pos[1]);
-      scene.add(isl);
-      return isl;
-    });
-
-    const sun = new THREE.DirectionalLight(0xffffff, 1);
-    sun.position.set(10,20,10);
-    scene.add(sun);
-    scene.add(new THREE.AmbientLight(0x404040));
-
-    const fishTypes = [
-      { name:"Tuna", weight:5, value:50, color:0x999999 },
-      { name:"Salmon", weight:3, value:35, color:0xff704d },
-      { name:"Golden Carp", weight:1, value:100, color:0xffd700 },
-      { name:"Swordfish", weight:6, value:80, color:0x334455 },
-      { name:"Clownfish", weight:1, value:40, color:0xff5500 },
-      { name:"Anglerfish", weight:4, value:90, color:0x333300 },
-      { name:"Marlin", weight:7, value:110, color:0x004488 },
-      { name:"Seabass", weight:2, value:30, color:0x999966 },
-      { name:"Trout", weight:3, value:45, color:0xcc9966 },
-      { name:"Stingray", weight:5, value:120, color:0x444444 },
-      { name:"Eel", weight:4, value:60, color:0x222255 },
-      { name:"Jellyfish", weight:1, value:25, color:0xccffff },
-      { name:"Mackerel", weight:2, value:28, color:0x7777aa },
-      { name:"Halibut", weight:6, value:85, color:0x445522 },
-      { name:"Barracuda", weight:5, value:75, color:0x223344 },
-      { name:"Catfish", weight:4, value:55, color:0x553311 },
-      { name:"Blue Tang", weight:1, value:50, color:0x0000ff },
-      { name:"Pufferfish", weight:2, value:35, color:0xffcc00 },
-      { name:"Snapper", weight:3, value:60, color:0xff3333 },
-      { name:"Koi", weight:2, value:45, color:0xffaa00 },
-      { name:"Tilapia", weight:2, value:33, color:0xaaffcc },
-      { name:"Zebrafish", weight:1, value:20, color:0xffffff },
-      { name:"Crab", weight:1, value:15, color:0xaa0000 }
-    ];
-
-    const activeFish = [];
-    function spawnFish(){
-      const spec = fishTypes[Math.floor(Math.random()*fishTypes.length)];
-      const f = new THREE.Mesh(new THREE.SphereGeometry(0.3), new THREE.MeshBasicMaterial({ color: spec.color }));
-      f.userData = spec;
-      f.position.set((Math.random()-0.5)*50, 0.3, (Math.random()-0.5)*50);
-      scene.add(f);
-      activeFish.push(f);
-    }
-    for(let i=0;i<30;i++) spawnFish();
-
-    const state = { money:0, inventory:[], rod:"Basic" };
-    const ui = {
-      money: document.getElementById("money"),
-      rod: document.getElementById("rod"),
-      inventory: document.getElementById("inventory")
-    };
-
-    const keys = {};
-    window.addEventListener('keydown', e=>keys[e.key]=true);
-    window.addEventListener('keyup', e=>keys[e.key]=false);
-
-    document.getElementById("btnCatch").addEventListener('click', catchFish);
-    document.getElementById("btnSell").addEventListener('click', sellFish);
-    document.getElementById("btnUpgrade").addEventListener('click', upgradeRod);
-    document.getElementById("btnDive").addEventListener('click', ()=>alert("Underwater exploration coming soon!"));
-
-    function catchFish(){
-      activeFish.some((f, i)=>{
-        if(f.position.distanceTo(boat.position) < 2){
-          state.inventory.push(f.userData);
-          scene.remove(f);
-          activeFish.splice(i,1);
-          updateUI();
-          return true;
-        }
-      });
+    const progressBar = document.getElementById("progress-bar");
+    function updateProgress(p) {
+      progressBar.style.width = Math.min(100, p * 100) + "%";
     }
 
-    function sellFish(){
-      islands.forEach(isl=>{
-        if(isl.position.distanceTo(boat.position) < 5){
-          const value = state.inventory.reduce((sum,f)=>sum+f.value, 0);
-          state.money += value;
-          state.inventory = [];
-          updateUI();
-          alert(`Sold for $${value}`);
-        }
-      });
+    function hideLoading() {
+      document.getElementById("loading").style.display = "none";
     }
 
-    function upgradeRod(){
-      const upg = { Basic:"Silver", Silver:"Gold" };
-      const costs = { Silver:200, Gold:500 };
-      const next = upg[state.rod];
-      if(next && state.money >= costs[next]){
-        state.money -= costs[next];
-        state.rod = next;
-        updateUI();
-        alert(`Upgraded to ${next}`);
-      } else alert("Need more money!");
-    }
-
-    function updateUI(){
-      ui.money.innerText = state.money;
-      ui.rod.innerText = state.rod;
-      ui.inventory.innerText = state.inventory.map(f=>f.name).join(', ') || 'None';
-    }
-
-    function animate(){
-      requestAnimationFrame(animate);
-      if(keys.ArrowUp) boat.position.z -= 0.1;
-      if(keys.ArrowDown) boat.position.z += 0.1;
-      if(keys.ArrowLeft) boat.position.x -= 0.1;
-      if(keys.ArrowRight) boat.position.x += 0.1;
-      camera.lookAt(boat.position);
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    window.addEventListener('resize', ()=>{
-      camera.aspect = window.innerWidth/window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 0.1;
+      updateProgress(progress);
+      if (progress >= 1) {
+        clearInterval(interval);
+        hideLoading();
+      }
+    }, 200);
   </script>
 </body>
 </html>
