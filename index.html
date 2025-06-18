@@ -1,519 +1,861 @@
 <!DOCTYPE html>
-<html lang="en">
+
+<html lang="en" >
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Deepen Sea - 2D UI Mockup</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fishing Planet 2D - Advanced</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-    body {
-      background: url('https://images.unsplash.com/photo-1516908205727-40afad9449e2?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
-      background-size: cover;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    #player-info {
-      background: rgba(0, 68, 102, 0.8);
-      color: white;
-      padding: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    #player-info span { margin: 0 10px; }
-
-    #main-buttons {
-      background: rgba(207, 238, 255, 0.85);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 15px;
-    }
-    .menu-button {
-      background: #0077aa;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-size: 16px;
-      width: 200px;
-      text-align: left;
-    }
-    .menu-button:hover { background: #005577; cursor: pointer; }
-
-    #bottom-nav {
-      background: rgba(0, 68, 102, 0.8);
-      display: flex;
-      justify-content: space-around;
-      padding: 10px 0;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-    }
-    .nav-button {
-      color: white;
-      font-size: 14px;
-      text-align: center;
-      cursor: pointer;
-    }
-
-    #loading {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: #001122;
-      color: white;
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-    #loading h1 { margin-bottom: 20px; font-size: 2em; }
-    #progress-container {
-      width: 80%;
-      background: #333;
-      border-radius: 10px;
+    /* Reset and base */
+    body, html {
+      margin: 0; padding: 0; height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom, #a1d4f9, #1765a9);
       overflow: hidden;
+      color: #fff;
     }
-    #progress-bar {
-      height: 20px;
-      background: #00ccff;
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-
-    /* --- Fishing Game Styles --- */
-    #fishing-game-overlay {
+    #loading-screen {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 30, 0.95);
-      color: white;
-      display: none;
+      background: #0b3954;
+      display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      z-index: 10000;
-      padding: 20px;
+      z-index: 9999;
+      user-select: none;
     }
-    #fishing-area {
-      background: #004466;
-      border: 2px solid #00ccff;
-      width: 90vw;
-      height: 300px;
+    #loading-screen.hidden {
+      display: none;
+    }
+    #loading-title {
+      font-size: 3em;
       margin-bottom: 20px;
-      position: relative;
-      overflow: hidden;
-      border-radius: 10px;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      color: #00ffff;
+      text-shadow: 0 0 10px #00ffff;
     }
-    .fish {
-      position: absolute;
-      width: 50px;
+    #progress-bar-container {
+      width: 70%;
       height: 25px;
-      background: #00ccff;
-      border-radius: 15px / 50%;
-      cursor: pointer;
+      background: #2f536e;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      box-shadow: inset 0 0 10px #074d71;
+    }
+    #progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00ffff 0%, #00aaff 100%);
+      border-radius: 12px 0 0 12px;
+      transition: width 0.3s ease;
+    }
+    #login-form {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      user-select: none;
-      transition: transform 0.3s, opacity 0.5s ease;
-      opacity: 0;
-      animation: fadeInFish 0.8s forwards;
     }
-    @keyframes fadeInFish {
-      to { opacity: 1; }
-    }
-    .fish:hover {
-      transform: scale(1.2);
-    }
-    #cast-btn {
-      background: #0099ff;
+    #login-input {
+      padding: 10px 15px;
+      font-size: 1.2em;
+      border-radius: 12px;
       border: none;
-      padding: 12px 30px;
-      font-size: 18px;
-      border-radius: 15px;
-      cursor: pointer;
+      outline: none;
+      width: 250px;
       margin-bottom: 15px;
-      transition: background-color 0.3s;
     }
-    #cast-btn:disabled {
-      background-color: #005577;
-      cursor: not-allowed;
-    }
-    #close-fishing {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      font-size: 20px;
+    #login-btn {
+      padding: 10px 20px;
+      font-size: 1.2em;
+      border-radius: 12px;
+      border: none;
+      background: #00ffff;
+      color: #003344;
+      font-weight: 700;
       cursor: pointer;
-      background: #003344;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      text-align: center;
-      line-height: 30px;
-      user-select: none;
+      box-shadow: 0 0 10px #00ffff;
+      transition: background-color 0.3s ease;
+    }
+    #login-btn:hover {
+      background: #00ccff;
     }
 
-    /* Shop modal */
-    #shop-modal {
-      position: fixed;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 68, 102, 0.95);
-      padding: 20px;
-      border-radius: 15px;
-      width: 320px;
-      max-width: 90vw;
-      display: none;
-      color: white;
-      z-index: 10001;
-      box-shadow: 0 0 15px #00ccff;
-    }
-    #shop-modal h2 {
-      margin-bottom: 15px;
-      text-align: center;
-    }
-    #shop-items {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .shop-item {
-      background: #0077aa;
-      padding: 10px;
-      border-radius: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      user-select: none;
-      transition: background 0.3s;
-      position: relative;
-    }
-    .shop-item:hover {
-      background: #005577;
-    }
-    .shop-item span {
-      font-weight: bold;
-    }
-    .owned-label {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: #00cc00;
-      color: black;
-      padding: 3px 8px;
-      border-radius: 8px;
-      font-size: 12px;
-      user-select: none;
-    }
-    .equipped-label {
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: #ffdd00;
-      color: black;
-      padding: 3px 8px;
-      border-radius: 8px;
-      font-size: 12px;
-      user-select: none;
-    }
-    #close-shop {
-      text-align: center;
-      margin-top: 15px;
-      background: #003344;
-      border-radius: 10px;
-      padding: 8px;
-      cursor: pointer;
-      user-select: none;
-    }
+```
+/* Main game UI */
+#game-ui {
+  display: none;
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(to bottom, #81c7f5 0%, #1765a9 70%, #0b3954 100%);
+  user-select: none;
+}
+#header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 60px;
+  background: #003355cc;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  font-weight: 700;
+  font-size: 1.2em;
+  color: #00ffff;
+  z-index: 20;
+  box-shadow: 0 4px 12px #003355aa;
+  user-select: none;
+}
+#header > div {
+  margin: 0 15px;
+}
+
+#equipped-display {
+  position: fixed;
+  top: 60px; left: 10px;
+  background: #004477cc;
+  padding: 10px 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px #0077ccaa;
+  font-weight: 600;
+  user-select: none;
+  color: #99eeff;
+  z-index: 20;
+}
+#equipped-display div {
+  margin-bottom: 6px;
+}
+
+#game-area {
+  position: absolute;
+  top: 110px;
+  left: 0; right: 0; bottom: 0;
+  background: #1765a9;
+  overflow: hidden;
+}
+#water-surface {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #0b3954;
+  overflow: hidden;
+  border-top: 4px solid #00ccffaa;
+  user-select: none;
+}
+#shoreline {
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  height: 80px;
+  background: linear-gradient(to top, #5a4035, #8a705a);
+  box-shadow: inset 0 10px 20px #3a2b22aa;
+  user-select: none;
+}
+#fishing-line {
+  position: absolute;
+  width: 4px;
+  background: #555;
+  opacity: 0;
+  transform-origin: top center;
+  transition: opacity 0.3s ease;
+  border-radius: 2px;
+  box-shadow: 0 0 6px #777;
+  z-index: 15;
+}
+#bobber {
+  position: absolute;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, #ff4040, #c02020);
+  border: 3px solid white;
+  box-shadow: 0 0 8px 3px rgba(255,0,0,0.8);
+  opacity: 0;
+  cursor: pointer;
+  z-index: 20;
+  user-select: none;
+}
+#fish-container {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+.fish {
+  position: absolute;
+  border-radius: 50% / 50%;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.3s ease;
+  box-shadow: 0 0 5px #004466aa;
+}
+/* Fish colors by type */
+.fish-type-1 {
+  background: radial-gradient(circle at center, #f2a365, #d9742b);
+  width: 40px; height: 20px;
+}
+.fish-type-2 {
+  background: radial-gradient(circle at center, #5aa469, #397d53);
+  width: 50px; height: 25px;
+}
+.fish-type-3 {
+  background: radial-gradient(circle at center, #a35a9d, #722d80);
+  width: 35px; height: 15px;
+}
+.fish-type-4 {
+  background: radial-gradient(circle at center, #5a8dda, #2f5b9e);
+  width: 60px; height: 30px;
+}
+
+/* Buttons */
+#controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  display: flex;
+  gap: 12px;
+}
+button {
+  background: #3399ffcc;
+  border: none;
+  padding: 14px 26px;
+  border-radius: 15px;
+  font-weight: 700;
+  font-size: 1.1em;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 0 10px #2277ccaa;
+  transition: background-color 0.3s ease;
+  user-select: none;
+}
+button:hover:not(:disabled) {
+  background: #558fe6cc;
+}
+button:disabled {
+  background: #666;
+  cursor: not-allowed;
+}
+
+/* Shop modal */
+#shop-modal {
+  position: fixed;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  width: 380px;
+  max-height: 75vh;
+  background: #004477dd;
+  box-shadow: 0 0 30px #00ccffbb;
+  border-radius: 12px;
+  color: #ddf0ff;
+  font-weight: 600;
+  overflow-y: auto;
+  z-index: 999;
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.25, 1.5, 0.5, 1), opacity 0.3s ease;
+}
+#shop-modal.show {
+  transform: translateX(-50%) scale(1);
+  opacity: 1;
+}
+#shop-header {
+  display: flex;
+  justify-content: space-around;
+  background: #0077ccdd;
+  border-radius: 12px 12px 0 0;
+  user-select: none;
+}
+.shop-tab {
+  flex: 1;
+  text-align: center;
+  padding: 12px 0;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: border-color 0.3s ease;
+}
+.shop-tab.active {
+  border-color: #ffcc00;
+  font-weight: 700;
+  color: #ffee77;
+  text-shadow: 0 0 8px #ffcc00;
+}
+#shop-items {
+  padding: 10px 15px;
+}
+.shop-item {
+  display: flex;
+  justify-content: space-between;
+  background: #0077cc55;
+  border-radius: 10px;
+  padding: 10px 15px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 8px #0099ff88;
+  transition: background-color 0.3s ease;
+  user-select: none;
+}
+.shop-item:hover {
+  background: #0099ff99;
+}
+.shop-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #00336655;
+  box-shadow: none;
+}
+.price {
+  color: #ffaa00;
+  font-weight: 700;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+.label-owned {
+  background: #2ecc71aa;
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-weight: 700;
+  color: white;
+  user-select: none;
+}
+.label-equip {
+  background: #3498dbaa;
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-weight: 700;
+  margin-left: 8px;
+  color: white;
+  user-select: none;
+}
+#shop-close {
+  width: 100%;
+  padding: 14px 0;
+  font-weight: 700;
+  border: none;
+  border-radius: 0 0 12px 12px;
+  background: #0055a9cc;
+  color: #aaffff;
+  cursor: pointer;
+  box-shadow: inset 0 0 15px #003355cc;
+  transition: background-color 0.3s ease;
+}
+#shop-close:hover {
+  background: #0077ffcc;
+}
+
+/* Upgrade bars */
+.upgrade-bar-container {
+  background: #003355cc;
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100px;
+  height: 10px;
+  margin-top: 4px;
+  box-shadow: inset 0 0 8px #0077ffcc;
+}
+.upgrade-bar-fill {
+  background: #00ccff;
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px #00ccffaa;
+}
+.upgrade-label {
+  font-size: 0.8em;
+  margin-top: 2px;
+  color: #aaddffcc;
+  user-select: none;
+}
+```
+
   </style>
 </head>
 <body>
-  <div id="loading">
-    <h1>Deepen Sea</h1>
-    <div id="progress-container">
-      <div id="progress-bar"></div>
+  <!-- Loading screen -->
+  <div id="loading-screen">
+    <div id="loading-title">FISHING PLANET 2D</div>
+    <div id="progress-bar-container">
+      <div id="progress-bar-fill"></div>
     </div>
+    <form id="login-form">
+      <input type="text" id="login-input" placeholder="Enter username" required autocomplete="off" />
+      <button type="submit" id="login-btn">Start Game</button>
+    </form>
   </div>
 
-  <div id="player-info">
-    <span>🎣 Angler2529 (Beginner)</span>
-    <span id="coins">💰 1000</span>
-    <span>🎚️ Lv. 1</span>
-  </div>
+  <!-- Main game UI -->
 
-  <div id="main-buttons">
-    <button class="menu-button" id="main-game-btn">Main Game</button>
-    <button class="menu-button" onclick="alert('Missions coming soon!')">Missions</button>
-    <button class="menu-button" onclick="alert('Free Fishing coming soon!')">Free Fishing</button>
-    <button class="menu-button" onclick="alert('Challenge Fishing Cup coming soon!')">Challenge Fishing Cup</button>
-    <button class="menu-button" onclick="alert('Trout Masters coming soon!')">Trout Masters</button>
-    <button class="menu-button" onclick="alert('Past Results coming soon!')">Past Results</button>
-  </div>
-
-  <div id="bottom-nav">
-    <div class="nav-button" id="shop-btn">🏪<br/>Shop</div>
-    <div class="nav-button" onclick="alert('Leaderboards coming soon!')">🏆<br/>Leaderboards</div>
-    <div class="nav-button" onclick="alert('Profile coming soon!')">👤<br/>Profile</div>
-    <div class="nav-button" onclick="alert('Options coming soon!')">⚙️<br/>Options</div>
-    <div class="nav-button" onclick="alert('Upgrade coming soon!')">⬆️<br/>Upgrade</div>
-  </div>
-
-  <!-- Fishing Game Overlay -->
-  <div id="fishing-game-overlay">
-    <div id="close-fishing">×</div>
-    <h2>2D Fishing Game</h2>
-    <button id="cast-btn">🎣 Cast Line</button>
-    <div id="fishing-area"></div>
-    <div>Click fish to catch and earn coins!</div>
-    <div style="margin-top: 10px;">Current Rod: <span id="current-rod-name">Basic Rod</span></div>
-  </div>
-
-  <!-- Shop Modal -->
-  <div id="shop-modal">
-    <h2>Shop - Buy Fishing Rods</h2>
-    <div id="shop-items">
-      <!-- Items injected by JS -->
+  <div id="game-ui">
+    <div id="header">
+      <div>Coins: <span id="coins-count">0</span></div>
+      <div>Player: <span id="player-name">Guest</span></div>
+      <div>Level: <span id="player-level">1</span></div>
+      <div><button id="shop-button">Shop</button></div>
     </div>
-    <div id="close-shop">Close</div>
+
+```
+<div id="equipped-display">
+  <div>Rod: <span id="rod-name">Basic Rod</span> <button id="upgrade-rod-btn" title="Upgrade Rod">🔼</button></div>
+  <div>Boat: <span id="boat-name">Basic Boat</span> <button id="upgrade-boat-btn" title="Upgrade Boat">🔼</button></div>
+</div>
+
+<div id="game-area">
+  <div id="water-surface">
+    <div id="fish-container"></div>
+    <div id="fishing-line"></div>
+    <div id="bobber"></div>
+  </div>
+  <div id="shoreline"></div>
+</div>
+
+<div id="controls">
+  <button id="cast-button">Cast Line</button>
+  <button id="reel-button" disabled>Reel In</button>
+</div>
+
+<!-- Shop modal -->
+<div id="shop-modal" aria-hidden="true">
+  <div id="shop-header">
+    <div id="tab-rods" class="shop-tab active" tabindex="0" role="tab" aria-selected="true" aria-controls="shop-items">Rods</div>
+    <div id="tab-boats" class="shop-tab" tabindex="0" role="tab" aria-selected="false" aria-controls="shop-items">Boats</div>
+  </div>
+  <div id="shop-items" role="tabpanel" aria-live="polite" aria-label="Shop items"></div>
+  <button id="shop-close">Close Shop</button>
+</div>
+```
+
   </div>
 
-  <script>
-    // Loading screen
-    const progressBar = document.getElementById("progress-bar");
-    function updateProgress(p) {
-      progressBar.style.width = Math.min(100, p * 100) + "%";
-    }
+<script>
+(() => {
+  const loadingScreen = document.getElementById('loading-screen');
+  const progressBarFill = document.getElementById('progress-bar-fill');
+  const loginForm = document.getElementById('login-form');
+  const loginInput = document.getElementById('login-input');
 
-    function hideLoading() {
-      document.getElementById("loading").style.display = "none";
-    }
+  const gameUI = document.getElementById('game-ui');
+  const coinsCount = document.getElementById('coins-count');
+  const playerNameDisplay = document.getElementById('player-name');
+  const playerLevelDisplay = document.getElementById('player-level');
 
+  const rodNameDisplay = document.getElementById('rod-name');
+  const boatNameDisplay = document.getElementById('boat-name');
+  const upgradeRodBtn = document.getElementById('upgrade-rod-btn');
+  const upgradeBoatBtn = document.getElementById('upgrade-boat-btn');
+
+  const shopModal = document.getElementById('shop-modal');
+  const shopItemsContainer = document.getElementById('shop-items');
+  const tabRods = document.getElementById('tab-rods');
+  const tabBoats = document.getElementById('tab-boats');
+  const shopButton = document.getElementById('shop-button');
+  const shopCloseButton = document.getElementById('shop-close');
+
+  const castButton = document.getElementById('cast-button');
+  const reelButton = document.getElementById('reel-button');
+
+  const fishingLine = document.getElementById('fishing-line');
+  const bobber = document.getElementById('bobber');
+  const fishContainer = document.getElementById('fish-container');
+
+  // Audio context and sounds
+  let audioCtx;
+  let bgMusic;
+  const soundBuffers = {};
+
+  // Player data with default
+  let playerData = {
+    username: 'Guest',
+    coins: 500,
+    level: 1,
+    equippedRodId: 1,
+    equippedBoatId: 1,
+    rods: [
+      { id: 1, name: 'Basic Rod', cost: 0, owned: true, equipped: true, reward: 10, upgradeLevel: 0, maxUpgrade: 5, catchChance: 0.5 },
+      { id: 2, name: 'Silver Rod', cost: 150, owned: false, equipped: false, reward: 20, upgradeLevel: 0, maxUpgrade: 5, catchChance: 0.65 },
+      { id: 3, name: 'Golden Rod', cost: 350, owned: false, equipped: false, reward: 40, upgradeLevel: 0, maxUpgrade: 5, catchChance: 0.8 },
+    ],
+    boats: [
+      { id: 1, name: 'Basic Boat', cost: 0, owned: true, equipped: true, speed: 1, upgradeLevel: 0, maxUpgrade: 5 },
+      { id: 2, name: 'Speedy Boat', cost: 300, owned: false, equipped: false, speed: 1.5, upgradeLevel: 0, maxUpgrade: 5 },
+      { id: 3, name: 'Turbo Boat', cost: 700, owned: false, equipped: false, speed: 2, upgradeLevel: 0, maxUpgrade: 5 },
+    ]
+  };
+
+  let currentTab = 'rods';
+  let fishing = false;
+  let fishCaught = null;
+
+  // Fish types data
+  const fishTypes = [
+    { id: 1, name: 'Small Fish', speed: 0.5, colorClass: 'fish-type-1', value: 15, size: [40,20] },
+    { id: 2, name: 'Medium Fish', speed: 0.8, colorClass: 'fish-type-2', value: 30, size: [50,25] },
+    { id: 3, name: 'Rare Fish', speed: 0.4, colorClass: 'fish-type-3', value: 80, size: [35,15] },
+    { id: 4, name: 'Big Fish', speed: 0.6, colorClass: 'fish-type-4', value: 50, size: [60,30] },
+  ];
+
+  // Fish objects in game
+  let fishes = [];
+
+  // Load from localStorage or init fresh
+  function loadPlayerData() {
+    const saved = localStorage.getItem('fishing-planet-2d-save');
+    if (saved) {
+      try {
+        playerData = JSON.parse(saved);
+        playerData.rods.forEach(r => r.upgradeLevel = r.upgradeLevel || 0);
+        playerData.boats.forEach(b => b.upgradeLevel = b.upgradeLevel || 0);
+        playerData.level = playerData.level || 1;
+        playerData.coins = playerData.coins || 0;
+      } catch(e) {
+        console.warn("Failed loading save:", e);
+      }
+    }
+  }
+
+  // Save player data persistently
+  function savePlayerData() {
+    localStorage.setItem('fishing-planet-2d-save', JSON.stringify(playerData));
+  }
+
+  // Show loading progress bar animation and call callback when done
+  function simulateLoading(callback) {
     let progress = 0;
     const interval = setInterval(() => {
-      progress += 0.1;
-      updateProgress(progress);
-      if (progress >= 1) {
+      progress += Math.random() * 10 + 5;
+      if (progress >= 100) {
+        progressBarFill.style.width = '100%';
         clearInterval(interval);
-        hideLoading();
+        setTimeout(callback, 500);
+      } else {
+        progressBarFill.style.width = progress + '%';
       }
     }, 200);
+  }
 
-    // Player data
-    let coins = 1000;
-    const coinsDisplay = document.getElementById("coins");
+  // Setup audio context and load sounds
+  async function setupAudio() {
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    // Rods data
-    const rods = [
-      { id: 1, name: "Basic Rod", price: 0, reward: 10, maxFish: 3, spawnInterval: 2000 },
-      { id: 2, name: "Silver Rod", price: 500, reward: 20, maxFish: 4, spawnInterval: 1700 },
-      { id: 3, name: "Golden Rod", price: 1500, reward: 35, maxFish: 5, spawnInterval: 1400 },
-      { id: 4, name: "Diamond Rod", price: 4000, reward: 50, maxFish: 6, spawnInterval: 1100 }
-    ];
+      // Load simple sounds (using base64 or synthesized for demo)
+      soundBuffers['cast'] = await createToneBuffer(880, 0.1);
+      soundBuffers['reel'] = await createToneBuffer(660, 0.15);
+      soundBuffers['purchase'] = await createToneBuffer(1200, 0.1);
+      soundBuffers['upgrade'] = await createToneBuffer(1000, 0.3);
+      soundBuffers['catch'] = await createToneBuffer(440, 0.25);
 
-    // Player inventory: rods owned and equipped
-    let ownedRods = new Set([1]); // Start with Basic Rod owned
-    let equippedRodId = 1;
-
-    // Update coins display helper
-    function updateCoinsDisplay() {
-      coinsDisplay.textContent = "💰 " + coins;
+      // Background music simple loop (white noise with low volume for demo)
+      bgMusic = audioCtx.createOscillator();
+      bgMusic.type = 'triangle';
+      bgMusic.frequency.setValueAtTime(220, audioCtx.currentTime);
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+      bgMusic.connect(gain).connect(audioCtx.destination);
+      bgMusic.start();
+    } catch(e) {
+      console.warn("AudioContext not available or denied.", e);
     }
-    updateCoinsDisplay();
+  }
 
-    // Show shop modal & rods for sale
-    const shopModal = document.getElementById("shop-modal");
-    const shopBtn = document.getElementById("shop-btn");
-    const shopItemsDiv = document.getElementById("shop-items");
-    const closeShopBtn = document.getElementById("close-shop");
+  // Create a short tone buffer for a beep sound
+  function createToneBuffer(freq, duration) {
+    return new Promise(resolve => {
+      if (!audioCtx) return resolve(null);
+      const sampleRate = audioCtx.sampleRate;
+      const buffer = audioCtx.createBuffer(1, sampleRate * duration, sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i=0; i<data.length; i++) {
+        data[i] = Math.sin(2 * Math.PI * freq * i / sampleRate) * Math.exp(-3 * i / data.length);
+      }
+      resolve(buffer);
+    });
+  }
 
-    function renderShop() {
-      shopItemsDiv.innerHTML = "";
-      rods.forEach(rod => {
-        const item = document.createElement("div");
-        item.classList.add("shop-item");
-        item.textContent = `${rod.name} - ${rod.price > 0 ? "Price: " + rod.price + " coins" : "Free"}`;
+  // Play sound buffer by name
+  function playSound(name) {
+    if (!audioCtx || !soundBuffers[name]) return;
+    const source = audioCtx.createBufferSource();
+    source.buffer = soundBuffers[name];
+    source.connect(audioCtx.destination);
+    source.start();
+  }
 
-        // Owned label
-        if (ownedRods.has(rod.id)) {
-          const ownedLabel = document.createElement("div");
-          ownedLabel.classList.add("owned-label");
-          ownedLabel.textContent = "Owned";
-          item.appendChild(ownedLabel);
-        }
+  // Update all UI elements based on player data
+  function updateUI() {
+    coinsCount.textContent = playerData.coins;
+    playerNameDisplay.textContent = playerData.username;
+    playerLevelDisplay.textContent = playerData.level;
 
-        // Equipped label
-        if (equippedRodId === rod.id) {
-          const equippedLabel = document.createElement("div");
-          equippedLabel.classList.add("equipped-label");
-          equippedLabel.textContent = "Equipped";
-          item.appendChild(equippedLabel);
-        }
+    const rod = playerData.rods.find(r => r.id === playerData.equippedRodId);
+    rodNameDisplay.textContent = rod ? rod.name + (rod.upgradeLevel > 0 ? ` +${rod.upgradeLevel}` : '') : 'None';
+    const boat = playerData.boats.find(b => b.id === playerData.equippedBoatId);
+    boatNameDisplay.textContent = boat ? boat.name + (boat.upgradeLevel > 0 ? ` +${boat.upgradeLevel}` : '') : 'None';
+  }
 
-        // Click to buy or equip
-        item.addEventListener("click", () => {
-          if (ownedRods.has(rod.id)) {
-            // Equip rod
-            equippedRodId = rod.id;
-            document.getElementById("current-rod-name").textContent = rods.find(r => r.id === equippedRodId).name;
-            renderShop();
-          } else {
-            // Buy rod if enough coins
-            if (coins >= rod.price) {
-              coins -= rod.price;
-              ownedRods.add(rod.id);
-              equippedRodId = rod.id;
-              updateCoinsDisplay();
-              document.getElementById("current-rod-name").textContent = rod.name;
-              renderShop();
-              alert(`You bought and equipped ${rod.name}!`);
-            } else {
-              alert("Not enough coins to buy this rod.");
-            }
+  // Render shop items for rods or boats
+  function renderShopItems() {
+    shopItemsContainer.innerHTML = '';
+    let list = currentTab === 'rods' ? playerData.rods : playerData.boats;
+
+    list.forEach(item => {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'shop-item';
+      itemDiv.tabIndex = 0;
+
+      let ownedText = item.owned ? '(Owned)' : `Cost: ${item.cost} coins`;
+
+      itemDiv.innerHTML = `<strong>${item.name}</strong> ${ownedText}`;
+
+      if (!item.owned) {
+        const buyBtn = document.createElement('button');
+        buyBtn.textContent = 'Buy';
+        buyBtn.disabled = playerData.coins < item.cost;
+        buyBtn.onclick = () => {
+          if (playerData.coins >= item.cost) {
+            playerData.coins -= item.cost;
+            item.owned = true;
+            equipItem(item.id, currentTab);
+            playSound('purchase');
+            savePlayerData();
+            updateUI();
+            renderShopItems();
           }
-        });
+        };
+        itemDiv.appendChild(buyBtn);
+      } else if (!item.equipped) {
+        const equipBtn = document.createElement('button');
+        equipBtn.textContent = 'Equip';
+        equipBtn.onclick = () => {
+          equipItem(item.id, currentTab);
+          playSound('purchase');
+          savePlayerData();
+          updateUI();
+          renderShopItems();
+        };
+        itemDiv.appendChild(equipBtn);
+      } else {
+        const equippedLabel = document.createElement('span');
+        equippedLabel.textContent = 'Equipped';
+        equippedLabel.style.marginLeft = '10px';
+        itemDiv.appendChild(equippedLabel);
+      }
+      shopItemsContainer.appendChild(itemDiv);
+    });
+  }
 
-        shopItemsDiv.appendChild(item);
-      });
+  // Equip a rod or boat by id
+  function equipItem(id, type) {
+    if (type === 'rods') {
+      playerData.rods.forEach(r => r.equipped = false);
+      const rod = playerData.rods.find(r => r.id === id);
+      if (rod) {
+        rod.equipped = true;
+        playerData.equippedRodId = id;
+      }
+    } else if (type === 'boats') {
+      playerData.boats.forEach(b => b.equipped = false);
+      const boat = playerData.boats.find(b => b.id === id);
+      if (boat) {
+        boat.equipped = true;
+        playerData.equippedBoatId = id;
+      }
     }
+  }
 
-    shopBtn.addEventListener("click", () => {
-      renderShop();
-      shopModal.style.display = "block";
-    });
-    closeShopBtn.addEventListener("click", () => {
-      shopModal.style.display = "none";
-    });
+  // Upgrade rod or boat
+  function upgradeItem(type) {
+    let list = type === 'rod' ? playerData.rods : playerData.boats;
+    const equippedItem = list.find(i => i.equipped);
+    if (!equippedItem) return;
 
-    // Fishing game logic
-    const fishingOverlay = document.getElementById("fishing-game-overlay");
-    const mainGameBtn = document.getElementById("main-game-btn");
-    const closeFishingBtn = document.getElementById("close-fishing");
-    const castBtn = document.getElementById("cast-btn");
-    const fishingArea = document.getElementById("fishing-area");
-    const currentRodName = document.getElementById("current-rod-name");
-
-    // Show fishing overlay
-    mainGameBtn.addEventListener("click", () => {
-      fishingOverlay.style.display = "flex";
-      currentRodName.textContent = rods.find(r => r.id === equippedRodId).name;
-      startFishing();
-    });
-
-    closeFishingBtn.addEventListener("click", () => {
-      fishingOverlay.style.display = "none";
-      stopFishing();
-    });
-
-    let fishInterval = null;
-    let fishIdCounter = 0;
-    let activeFish = new Map(); // fishId -> element
-
-    // Create fish element with animation and click handler
-    function createFish() {
-      if (activeFish.size >= rods.find(r => r.id === equippedRodId).maxFish) return;
-
-      const fish = document.createElement("div");
-      fish.classList.add("fish");
-      fish.textContent = "🐟";
-
-      // Random position inside fishing area
-      const maxX = fishingArea.clientWidth - 50;
-      const maxY = fishingArea.clientHeight - 25;
-      const x = Math.random() * maxX;
-      const y = Math.random() * maxY;
-      fish.style.left = x + "px";
-      fish.style.top = y + "px";
-
-      // Assign unique ID
-      fishIdCounter++;
-      const fishId = fishIdCounter;
-      activeFish.set(fishId, fish);
-
-      fishingArea.appendChild(fish);
-
-      // Animate fish fadeIn is done by CSS
-
-      // Click to catch fish
-      fish.addEventListener("click", () => {
-        catchFish(fishId);
-      });
+    const upgradeCost = Math.floor((equippedItem.upgradeLevel + 1) * 100);
+    if (playerData.coins >= upgradeCost && equippedItem.upgradeLevel < equippedItem.maxUpgrade) {
+      playerData.coins -= upgradeCost;
+      equippedItem.upgradeLevel++;
+      // For rods, increase catchChance & reward
+      if (type === 'rod') {
+        equippedItem.catchChance = Math.min(1, equippedItem.catchChance + 0.05);
+        equippedItem.reward = Math.floor(equippedItem.reward * 1.2);
+      } else if (type === 'boat') {
+        // For boats, increase speed multiplier
+        equippedItem.speed += 0.1;
+      }
+      playSound('upgrade');
+      savePlayerData();
+      updateUI();
+      renderShopItems();
     }
+  }
 
-    function catchFish(fishId) {
-      const fish = activeFish.get(fishId);
-      if (!fish) return;
+  // Handle fish movement animation
+  function animateFish() {
+    fishes.forEach(fish => {
+      fish.x += fish.speed * (fish.direction === 'right' ? 1 : -1);
+      if (fish.x > 100) {
+        fish.direction = 'left';
+        fish.element.style.transform = 'scaleX(-1)';
+      } else if (fish.x < 0) {
+        fish.direction = 'right';
+        fish.element.style.transform = 'scaleX(1)';
+      }
+      fish.element.style.left = fish.x + '%';
+    });
+  }
 
-      // Disable click
-      fish.style.pointerEvents = "none";
+  // Spawn fish periodically
+  function spawnFish() {
+    if (fishes.length >= 8) return;
+    const fishType = fishTypes[Math.floor(Math.random() * fishTypes.length)];
+    const fishEl = document.createElement('div');
+    fishEl.className = `fish ${fishType.colorClass}`;
+    fishEl.style.width = fishType.size[0] + 'px';
+    fishEl.style.height = fishType.size[1] + 'px';
+    fishEl.style.top = (20 + Math.random() * 60) + '%';
+    fishEl.style.left = (Math.random() * 100) + '%';
+    fishEl.style.position = 'absolute';
+    fishEl.style.transition = 'transform 0.3s ease';
 
-      // Animate fade out
-      fish.style.opacity = 0;
+    const direction = Math.random() > 0.5 ? 'right' : 'left';
 
-      // Remove fish after animation
+    fishContainer.appendChild(fishEl);
+
+    fishes.push({
+      id: fishType.id,
+      element: fishEl,
+      x: parseFloat(fishEl.style.left),
+      speed: fishType.speed * (playerData.boats.find(b => b.equipped).speed),
+      direction: direction,
+      value: fishType.value,
+      caught: false
+    });
+  }
+
+  // Handle casting line and starting fishing
+  function castLine() {
+    if (fishing) return;
+    fishing = true;
+    castButton.disabled = true;
+    reelButton.disabled = false;
+    playSound('cast');
+
+    bobber.style.top = '50%';
+    bobber.style.left = '50%';
+    fishingLine.style.height = '50%';
+    fishingLine.style.left = '50%';
+
+    // Randomly pick a fish near bobber for catch chance
+    fishCaught = null;
+    const availableFish = fishes.filter(f => !f.caught);
+    if (availableFish.length) {
+      const chanceFish = availableFish[Math.floor(Math.random() * availableFish.length)];
+      const rod = playerData.rods.find(r => r.equipped);
+      if (Math.random() < rod.catchChance) {
+        fishCaught = chanceFish;
+      }
+    }
+  }
+
+  // Handle reeling in fish
+  function reelIn() {
+    if (!fishing) return;
+    fishing = false;
+    castButton.disabled = false;
+    reelButton.disabled = true;
+
+    if (fishCaught) {
+      fishCaught.caught = true;
+      playSound('catch');
+      // Remove fish element visually
+      fishCaught.element.style.transition = 'opacity 0.5s ease';
+      fishCaught.element.style.opacity = 0;
       setTimeout(() => {
-        fishingArea.removeChild(fish);
-        activeFish.delete(fishId);
-      }, 500);
-
-      // Add coins based on equipped rod reward
-      const reward = rods.find(r => r.id === equippedRodId).reward;
-      coins += reward;
-      updateCoinsDisplay();
+        fishContainer.removeChild(fishCaught.element);
+        fishes = fishes.filter(f => f !== fishCaught);
+      }, 600);
+      playerData.coins += fishCaught.value * (playerData.rods.find(r => r.equipped).reward / 10);
+      savePlayerData();
+      updateUI();
+    } else {
+      playSound('reel');
     }
 
-    function startFishing() {
-      // Clear any existing fish
-      fishingArea.innerHTML = "";
-      activeFish.clear();
+    fishingLine.style.height = '0%';
+    bobber.style.top = '80%';
+  }
 
-      // Enable cast button
-      castBtn.disabled = false;
-    }
-
-    function stopFishing() {
-      // Clear fish and intervals
-      fishingArea.innerHTML = "";
-      activeFish.clear();
-      clearInterval(fishInterval);
-      fishInterval = null;
-      castBtn.disabled = true;
-    }
-
-    castBtn.addEventListener("click", () => {
-      // Disable button during fishing phase
-      castBtn.disabled = true;
-
-      // Spawn fish repeatedly for 10 seconds at rod speed
-      const rod = rods.find(r => r.id === equippedRodId);
-      const spawnTime = rod.spawnInterval;
-
-      // Spawn fish immediately and then periodically
-      createFish();
-
-      let spawnCount = 1;
-      const maxSpawn = rod.maxFish;
-      fishInterval = setInterval(() => {
-        if (spawnCount >= maxSpawn) {
-          clearInterval(fishInterval);
-          fishInterval = null;
-          castBtn.disabled = false;
-          return;
-        }
-        createFish();
-        spawnCount++;
-      }, spawnTime);
+  // Event Listeners
+  loginForm.addEventListener('submit', e => {
+    e.preventDefault();
+    playerData.username = loginInput.value.trim() || 'Guest';
+    playerNameDisplay.textContent = playerData.username;
+    simulateLoading(() => {
+      loadingScreen.style.display = 'none';
+      gameUI.style.display = 'block';
+      updateUI();
+      savePlayerData();
+      setupAudio();
+      spawnInitialFish();
+      gameLoop();
     });
-  </script>
+  });
+
+  shopButton.addEventListener('click', () => {
+    shopModal.style.display = 'block';
+    shopModal.setAttribute('aria-hidden', 'false');
+    renderShopItems();
+  });
+
+  shopCloseButton.addEventListener('click', () => {
+    shopModal.style.display = 'none';
+    shopModal.setAttribute('aria-hidden', 'true');
+  });
+
+  tabRods.addEventListener('click', () => {
+    currentTab = 'rods';
+    tabRods.classList.add('active');
+    tabBoats.classList.remove('active');
+    renderShopItems();
+  });
+
+  tabBoats.addEventListener('click', () => {
+    currentTab = 'boats';
+    tabBoats.classList.add('active');
+    tabRods.classList.remove('active');
+    renderShopItems();
+  });
+
+  upgradeRodBtn.addEventListener('click', () => {
+    upgradeItem('rod');
+  });
+
+  upgradeBoatBtn.addEventListener('click', () => {
+    upgradeItem('boat');
+  });
+
+  castButton.addEventListener('click', castLine);
+  reelButton.addEventListener('click', reelIn);
+
+  // Initial fish spawn
+  function spawnInitialFish() {
+    for(let i=0; i<5; i++) spawnFish();
+  }
+
+  // Main game loop
+  function gameLoop() {
+    animateFish();
+    spawnFish();
+    requestAnimationFrame(gameLoop);
+  }
+
+  // Load player data and initialize
+  loadPlayerData();
+
+  // Show loading screen and disable game UI initially
+  gameUI.style.display = 'none';
+  loadingScreen.style.display = 'flex';
+})();
+</script>
+
 </body>
 </html>
